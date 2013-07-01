@@ -23,6 +23,7 @@ namespace lnE
             client.Headers.Add(HttpRequestHeader.AcceptLanguage, "zh-CN");
             client.Headers.Add(HttpRequestHeader.AcceptEncoding, "gzip, deflate");
             client.Encoding = Encoding.UTF8;
+
             //client.Proxy = new WebProxy("127.0.0.1", 8888);
 
             var data = client.DownloadData(url);
@@ -112,17 +113,23 @@ namespace lnE
             var html = Encoding.UTF8.GetString(Encoding.UTF8.GetBytes(data).Skip(begin).Take(end - begin).ToArray());
             var doc = new HtmlAgilityPack.HtmlDocument();
             doc.LoadHtml(html);
-            var node = doc.DocumentNode.SelectNodes("/a").First();
-            var uri = new Uri(node.Attributes["href"].Value, UriKind.RelativeOrAbsolute);
-            if (!uri.IsAbsoluteUri)
+            try 
             {
-                var buri = new Uri(site, UriKind.Absolute);
-                Uri.TryCreate(buri, uri.OriginalString, out uri);
-                //buri.GetComponents(UriComponents.SchemeAndServer, UriFormat.SafeUnescaped);
-            }
-            
+                var node = doc.DocumentNode.SelectNodes("/a").First();
+                var uri = new Uri(node.Attributes["href"].Value, UriKind.RelativeOrAbsolute);
+                if (!uri.IsAbsoluteUri)
+                {
+                    var buri = new Uri(site, UriKind.Absolute);
+                    Uri.TryCreate(buri, uri.OriginalString, out uri);
+                    //buri.GetComponents(UriComponents.SchemeAndServer, UriFormat.SafeUnescaped);
+                }
 
-            return new Index { url = uri.AbsoluteUri, name = node.InnerText };
+                return new Index { url = uri.AbsoluteUri, name = XTrim(node.InnerText) };
+            }
+            catch
+            {
+                return null;
+            }
         }
     }
 }

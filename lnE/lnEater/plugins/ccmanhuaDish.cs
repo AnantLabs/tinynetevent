@@ -47,14 +47,12 @@ namespace lnE
             }
             else
             {
-                //var title = html.DocumentNode.SelectNodes("//div[@id='intro_l']/div[@class='title']/h1").First().InnerText;
                 var toc = html.DocumentNode.SelectNodes("//div[@id='play_0']/ul/li");
                 foreach (var t in toc)
                 {
                     var link = t.SelectNodes(".//a").First();
                     var subTitle = link.Attributes["title"].Value;
                     var u = new Uri(new Uri(url, UriKind.Absolute), link.Attributes["href"].Value).AbsoluteUri;
-                    //var n = String.Format("[{0}]{1}", XTrim(title), XTrim(subTitle));
                     var n = String.Format("{0}{1}", XTrim(subTitle), Path.DirectorySeparatorChar);
 
                     books.Add(new Index(level) { name = n, url = u });
