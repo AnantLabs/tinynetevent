@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EaterConsole", "ConsoleApplication1\EaterConsole.csproj", "{9ADA142F-0305-4D68-A870-2067BEEAAADB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "lnD", "lnD\lnD.csproj", "{F76096F1-5935-4A68-A6B2-BA693D850ADD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "lnE", "lnEater\lnE.csproj", "{DAB4B91C-C2F5-4586-8ACD-7A4DEBCA3C09}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9ADA142F-0305-4D68-A870-2067BEEAAADB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9ADA142F-0305-4D68-A870-2067BEEAAADB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9ADA142F-0305-4D68-A870-2067BEEAAADB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9ADA142F-0305-4D68-A870-2067BEEAAADB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F76096F1-5935-4A68-A6B2-BA693D850ADD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F76096F1-5935-4A68-A6B2-BA693D850ADD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F76096F1-5935-4A68-A6B2-BA693D850ADD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F76096F1-5935-4A68-A6B2-BA693D850ADD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DAB4B91C-C2F5-4586-8ACD-7A4DEBCA3C09}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DAB4B91C-C2F5-4586-8ACD-7A4DEBCA3C09}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DAB4B91C-C2F5-4586-8ACD-7A4DEBCA3C09}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DAB4B91C-C2F5-4586-8ACD-7A4DEBCA3C09}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
