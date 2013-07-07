@@ -2,107 +2,60 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
+using HtmlAgilityPack;
 
 namespace lnE
 {
-    [DishAttribute("http://www.bilibili.tv/video/", Level = 2, Ext = ".xml")]
+    [DishAttribute("http://www.bilibili.tv/video/", Level = 1, Ext = ".xml")]
     public class bilibiliDish : WebDish
     {
+        private string aid;
+
+        protected override bool BeforeRequest(WebClient client, string url)
+        {
+            client.Headers.Add(HttpRequestHeader.Cookie, "DedeUserID=1850724; DedeUserID__ckMd5=d746471f8c40baeb; SESSDATA=1e8e8161%2C1375784918%2C4042ce67");
+
+            return base.BeforeRequest(client, url);
+        }
+
         public override List<Index> GetIndex(HtmlAgilityPack.HtmlDocument html, string url, uint level, string path)
         {
             var books = new List<Index>();
 
-            if (level == 1)
-            {
-                books.Add(new Index(level) { name = path, url = GetTargetUrl(html) });
-                return books;
-            }
+            var links = html.DocumentNode.SelectNodes("//body/div[@class='z']/div[@class='z']/a");
 
-            var page = html.DocumentNode.SelectNodes("//body/div[@class='z']/div[@class='videobox']/div[@class='viewbox']").First();
-            
-            var title = page.SelectNodes("./div[@class='info']/h2").First().InnerText;
-            var toc = page.SelectNodes("./div[@class='alist']/div[@id='alist']").First();
-            if (toc.HasChildNodes)
+            if (links == null || links.Count / 3 <= 0 || links.Count % 3 != 0)
+                return null;
+
+            for (int i = 0; i < links.Count / 3; ++i)
             {
-                foreach (var t in toc.SelectNodes(".//option"))
-                {
-                    var subTitle = t.InnerText;
-                    var n = String.Format("[{0}]{1}", XTrim(title), XTrim(subTitle));
-                    var u = t.Attributes["value"].Value;
-                    books.Add(new Index(level) { name = n, url = u });
-                }
-            }
-            
-            if (!books.Any())
-            {
-                books.Add(new Index() { name = XTrim(title), url = GetTargetUrl(html), level = 2 });
-            }
-            else
-            {
-                var first = books.First();
-                first.url = GetTargetUrl(html);
-                first.level = 2;
+                var j = i * 3;
+                var title = links[j].InnerText;
+                var target = links[j + 1].Attributes["href"].Value;
+                //var uri = new Uri(target, UriKind.RelativeOrAbsolute);
+                var cid = Path.GetFileNameWithoutExtension(target);
+
+                var index = new Index(level) { name = XTrim(title), url = GetTargetUrl(cid) };
+                books.Add(index);
+
+                File.WriteAllText(Path.ChangeExtension(Path.Combine(path, index.name), "url"), String.Format("[InternetShortcut]{0}URL={1}", Environment.NewLine, GetPlayUrl(cid)));
             }
 
             return books;
         }
 
-        private string GetTargetUrl(HtmlAgilityPack.HtmlDocument html)
+        private string GetPlayUrl(string id)
         {
-            string id = null;
-            try 
-            {
-                var target = html.DocumentNode.SelectNodes("//body/div[@class='z']/div[@class='videobox']/div[@class='scontent']/iframe").FirstOrDefault();
-                if (target == null)
-                    throw new Exception();
-                var ex = new Regex("cid=(\\d+)");
-                var m = ex.Match(target.Attributes["src"].Value);
-                if (m.Groups.Count < 2)
-                    return null;
-                id = m.Groups[1].Value;
-            }
-            catch 
-            {
-            }
+            return String.Format("https://secure.bilibili.tv/secure,cid={0}&aid={1}", id, aid);
+        }
 
-            if (String.IsNullOrWhiteSpace(id))
-            {
-                try
-                {
-                    var target = html.DocumentNode.SelectNodes("//body/div[@class='z']/div[@class='videobox']/div[@class='scontent']/script[last()]").FirstOrDefault();
-                    if (target == null)
-                        throw new Exception();
-                    string js = target.InnerText;
-                    StringBuilder sb = new StringBuilder();
-                    using (var reader = new StringReader(js))
-                    {
-                        do
-                        {
-                            var line = reader.ReadLine().Trim();
-                            if (line.StartsWith("var flashvars"))
-                            {
-                                sb.AppendLine(line);
-                            }
-                        }
-                        while (reader.Peek() > 0);
-                    }
-                    js = sb.ToString();
-                    var flashvars = AssemblyHelper.EvalJs(js, "flashvars");
-                    id = flashvars["cid"];
-                }
-                catch
-                {
-                }
-
-            }
-
-            if (String.IsNullOrWhiteSpace(id))
-                throw new Exception("Not supported");
-
+        private string GetTargetUrl(string id)
+        {
             return String.Format("http://comment.bilibili.tv/{0}.xml", id);
         }
 
@@ -110,6 +63,21 @@ namespace lnE
         {
             html.Save(path, Encoding.UTF8);
             ExportAss(path);
+        }
+
+        public override HtmlDocument Load(string url, uint level, string path)
+        {
+            if (level == 0)
+            {
+                var ex = new Regex("av(\\d+)");
+                var match = ex.Match(url);
+                if (match.Groups.Count != 2)
+                    return null;
+                aid = match.Groups[1].Value;
+                url = String.Format("http://www.bilibili.tv/ass/{0}.html", aid);
+            }
+
+            return base.Load(url, level, path);
         }
 
         void ExportAss(string filename)
@@ -429,9 +397,8 @@ Format: Marked, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
                 if (lb.end < b.start)
                     return true;
 
-                return false;
-                //var diff = Math.Round((double)(lb.start - b.start) * Width / 400) - b.width;
-                //return diff > 0;
+                var diff = Math.Round((double)(lb.start - b.start) * Width / 400) - b.width;
+                return diff > 0;
             });
         }
 
