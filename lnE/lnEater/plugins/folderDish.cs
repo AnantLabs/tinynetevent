@@ -92,7 +92,6 @@ namespace lnE
 
             var first = data.First();
             var file = Path.GetDirectoryName(first);
-
             return new Index { url = file, name = String.Empty };
         }
     }

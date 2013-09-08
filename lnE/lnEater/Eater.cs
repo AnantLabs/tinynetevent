@@ -24,7 +24,7 @@ namespace lnE
         }
 
         private static Assembly assembly;
-        private static IList<Dish> dishes;
+        private static IList<Type> dishes;
         private IList<EDish> currentDishes;
 
         public static void Initialize(string path)
@@ -36,7 +36,7 @@ namespace lnE
                 dll = dll.Union(references.Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries)).ToArray();
             }
             assembly = AssemblyHelper.GetAssembly(dll, path);
-            dishes = AssemblyHelper.GetObject<Dish, DishAttribute>(assembly);
+            dishes = AssemblyHelper.GetTypes<DishAttribute>(assembly);
         }
 
         public bool Prepare(string url, string format)
@@ -54,20 +54,21 @@ namespace lnE
         private List<EDish> SelectDishes(string url, string format)
         {
             var list = (from dish in dishes
-                        let s = dish.GetType().GetCustomAttribute<DishAttribute>()
+                        let s = dish.GetCustomAttribute<DishAttribute>()
                         where s.DataFormat == format && Regex.IsMatch(url, s.Pattern, RegexOptions.IgnoreCase)
-                        select new EDish { url = url, path = String.Empty, dish = dish, settings = s }).ToList();
+                        select new EDish { url = url, path = String.Empty, dish = AssemblyHelper.GetObject<Dish>(dish), settings = s }).ToList();
             return list;
         }
 
         private List<EDish> SelectDishes(wnd.IDataObject ido)
         {
             var list = (from dish in dishes
-                        let s = dish.GetType().GetCustomAttribute<DishAttribute>()
+                        let s = dish.GetCustomAttribute<DishAttribute>()
                         where ido.GetDataPresent(s.DataFormat)
-                        let link = dish.GetLink(ido.GetData(s.DataFormat))
+                        let o = AssemblyHelper.GetObject<Dish>(dish)
+                        let link = o.GetLink(ido.GetData(s.DataFormat))
                         where link != null && Regex.IsMatch(link.url, s.Pattern, RegexOptions.IgnoreCase)
-                        select new EDish { url = link.url, path = link.name, dish = dish, settings = s }).ToList();
+                        select new EDish { url = link.url, path = link.name, dish = o, settings = s }).ToList();
             return list;
         }
 
@@ -100,6 +101,17 @@ namespace lnE
             foreach (var i in index)
             {
                 await EatPage(edish, i.url, i.level, Path.Combine(path, i.name));
+            }
+        }
+
+        public string Name
+        {
+            get
+            {
+                if (!currentDishes.Any())
+                    return String.Empty;
+
+                return currentDishes.First().url;
             }
         }
 
