@@ -24,10 +24,7 @@ namespace lnE
 
         protected string HtmlDecode(string html)
         {
-            html = html.Replace("&lt;", "<");
-            html = html.Replace("&gt;", ">");
-            html = html.Replace("&nbsp;", " ");
-            return html;
+            return WebUtility.HtmlDecode(html);
         }
 
         protected virtual bool BeforeRequest(WebClient client, string url)
