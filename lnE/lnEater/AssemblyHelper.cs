@@ -48,9 +48,19 @@ namespace lnE
             return result.CompiledAssembly;
         }
 
-        public static IList<T1> GetObject<T1, T2>(Assembly assembly)
+        public static IList<T1> GetObjects<T1, T2>(Assembly assembly)
         {
             return assembly.GetTypes().Where(t => t.IsDefined(typeof(T2))).Select(t => (T1)Activator.CreateInstance(t)).ToList();
+        }
+
+        public static IList<Type> GetTypes<T>(Assembly assembly)
+        {
+            return assembly.GetTypes().Where(t => t.IsDefined(typeof(T))).ToList();
+        }
+
+        public static T GetObject<T>(Type t)
+        {
+            return (T)Activator.CreateInstance(t);
         }
 
         public static dynamic EvalJs(string source, string varName = null)

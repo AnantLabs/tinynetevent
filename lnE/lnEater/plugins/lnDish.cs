@@ -40,7 +40,7 @@ namespace lnE
         {
             var view = html.DocumentNode.SelectNodes("//div[@id='J_view']");
             StringBuilder sb = new StringBuilder();
-            foreach (var node in view.First().ChildNodes)
+            foreach (var node in view.Last().ChildNodes)
             {
                 sb.Append(node.InnerText);
             }

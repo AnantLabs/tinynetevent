@@ -24,10 +24,7 @@ namespace lnE
 
         protected string HtmlDecode(string html)
         {
-            html = html.Replace("&lt;", "<");
-            html = html.Replace("&gt;", ">");
-            html = html.Replace("&nbsp;", " ");
-            return html;
+            return WebUtility.HtmlDecode(html);
         }
 
         protected virtual bool BeforeRequest(WebClient client, string url)
@@ -144,7 +141,7 @@ namespace lnE
             doc.LoadHtml(html);
             try 
             {
-                var node = doc.DocumentNode.SelectNodes("/a").First();
+                var node = doc.DocumentNode.SelectNodes("//a").First();
                 var uri = new Uri(node.Attributes["href"].Value, UriKind.RelativeOrAbsolute);
                 if (!uri.IsAbsoluteUri)
                 {
@@ -153,7 +150,17 @@ namespace lnE
                     //buri.GetComponents(UriComponents.SchemeAndServer, UriFormat.SafeUnescaped);
                 }
 
-                return new Index { url = uri.AbsoluteUri, name = XTrim(node.InnerText) };
+                var name = node.InnerText;
+                if (String.IsNullOrWhiteSpace(name) && node.FirstChild != null)
+                {
+                    name = node.FirstChild.GetAttributeValue("alt", String.Empty);
+                    if (String.IsNullOrWhiteSpace(name))
+                        name = node.FirstChild.GetAttributeValue("title", String.Empty);
+                    if (String.IsNullOrWhiteSpace(name))
+                        name = node.InnerText;
+                }
+
+                return new Index { url = uri.AbsoluteUri, name = XTrim(name) };
             }
             catch
             {
