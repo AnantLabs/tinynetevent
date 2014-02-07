@@ -57,6 +57,9 @@
     <None Include="plugins\ccmanhuaDish.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="plugins\sfDish.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <Compile Include="WebDish.cs" />
     <None Include="plugins\lnDish.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

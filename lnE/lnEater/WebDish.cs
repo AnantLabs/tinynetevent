@@ -12,10 +12,26 @@ namespace lnE
 {
     public abstract class WebDish : Dish
     {
-        protected virtual byte[] LoadData(string url)
+        protected string GetUrl(string baseUrl, string href)
         {
-            var client = new WebClient();
+            Uri newUrl;
+            if (!Uri.TryCreate(href, UriKind.Absolute, out newUrl))
+            {
+                newUrl = new Uri(new Uri(baseUrl, UriKind.Absolute), href);
+            }
+            return newUrl.AbsoluteUri;
+        }
 
+        protected string HtmlDecode(string html)
+        {
+            html = html.Replace("&lt;", "<");
+            html = html.Replace("&gt;", ">");
+            html = html.Replace("&nbsp;", " ");
+            return html;
+        }
+
+        protected virtual bool BeforeRequest(WebClient client, string url)
+        {
             client.Headers.Add(HttpRequestHeader.Referer, url);
             client.Headers.Add(HttpRequestHeader.UserAgent, "Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; WOW64; Trident/6.0)");
             //client.Headers.Add(HttpRequestHeader.Host, new Uri(url).Host);
@@ -23,8 +39,17 @@ namespace lnE
             client.Headers.Add(HttpRequestHeader.AcceptLanguage, "zh-CN");
             client.Headers.Add(HttpRequestHeader.AcceptEncoding, "gzip, deflate");
             client.Encoding = Encoding.UTF8;
-
             //client.Proxy = new WebProxy("127.0.0.1", 8888);
+
+            return true;
+        }
+
+        protected virtual byte[] LoadData(string url)
+        {
+            var client = new WebClient();
+
+            if (!BeforeRequest(client, url))
+                return null;
 
             var data = client.DownloadData(url);
 
@@ -70,7 +95,11 @@ namespace lnE
 
         public override HtmlDocument Load(string url, uint level, string path)
         {
-            string html = Encoding.UTF8.GetString(LoadData(url));
+            var data = LoadData(url);
+            if (data == null)
+                return null;
+
+            string html = Encoding.UTF8.GetString(data);
 
             var web = new HtmlDocument();
             web.LoadHtml(html);
