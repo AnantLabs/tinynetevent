@@ -24,6 +24,8 @@ namespace lnE
                 var subTitle = t.SelectNodes(".//div[2]/h2//a").First().InnerText;
 
                 var list = t.SelectNodes(".//div[2]/ul/li");
+                if (list == null)
+                    continue;
                 foreach (var chapter in list)
                 {
                     var c = chapter.SelectNodes("a").First();
