@@ -41,5 +41,41 @@ namespace lnE
         {
             e.Effect = e.AllowedEffect;
         }
+
+        private async void Form1_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
+        {
+            if (e.KeyData == (Keys.Control | Keys.V))
+            {
+                var data = Clipboard.GetDataObject();
+                if (data == null)
+                    return;
+
+                if (!data.GetDataPresent(typeof(string)))
+                    return;
+
+                var url = (string)data.GetData(typeof(string));
+
+                try 
+                {
+                    new Uri(url);
+                }
+                catch
+                {
+                    return;
+                }
+
+                var eater = new Eater();
+                if (eater.Prepare(url, DataFormats.Html))
+                {
+                    await eater.Eat(ConfigurationManager.AppSettings["path"]);
+                    MessageBox.Show("Completed!");
+                }
+
+                //foreach (var format in data.GetFormats())
+                //{
+                //    var content = data.GetData(format);
+                //}
+            }
+        }
     }
 }
